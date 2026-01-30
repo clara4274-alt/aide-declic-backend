@@ -1,9 +1,16 @@
 const express = require('express');
 const cors = require('cors');
+const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Initialiser Supabase
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY
+);
 
 // Middleware
 app.use(cors());
@@ -42,12 +49,6 @@ app.post('/api/analyze', (req, res) => {
   });
 });
 
-// Démarrage du serveur
-// ============================================
-// ROUTE À AJOUTER DANS TON FICHIER BACKEND
-// ============================================
-// À insérer JUSTE AVANT le app.listen(PORT, ...)
-
 // Route POST /api/avis - Soumettre un avis
 app.post('/api/avis', async (req, res) => {
   try {
@@ -74,7 +75,7 @@ app.post('/api/avis', async (req, res) => {
           nom: nom.trim(),
           note: parseInt(note),
           commentaire: commentaire ? commentaire.trim() : null,
-          approuve: false, // Par défaut non approuvé
+          approuve: false,
           date_creation: new Date().toISOString()
         }
       ])
@@ -127,6 +128,8 @@ app.get('/api/avis', async (req, res) => {
     });
   }
 });
+
+// Démarrage du serveur
 app.listen(PORT, () => {
   console.log(`🚀 Serveur démarré sur le port ${PORT}`);
 });
