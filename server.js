@@ -18,22 +18,6 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type']
 }));
-```
-
-## ✅ ACTION
-
-**Sur GitHub :**
-1. Ouvre **server.js**
-2. Trouve la ligne `app.use(cors());` (vers le début)
-3. Remplace-la par le code ci-dessus
-4. Commit → "Fix CORS configuration"
-5. Attends que Railway redéploie (1-2 min)
-
-**Ou alors test rapide :** 
-
-Avant de modifier, vérifie que le backend répond vraiment. **Ouvre un nouvel onglet** et va sur :
-```
-https://aide-declic-backend-production.up.railway.app/
 app.use(express.json());
 
 // Route de test
