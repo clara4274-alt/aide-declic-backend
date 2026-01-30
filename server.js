@@ -43,6 +43,90 @@ app.post('/api/analyze', (req, res) => {
 });
 
 // Démarrage du serveur
+// ============================================
+// ROUTE À AJOUTER DANS TON FICHIER BACKEND
+// ============================================
+// À insérer JUSTE AVANT le app.listen(PORT, ...)
+
+// Route POST /api/avis - Soumettre un avis
+app.post('/api/avis', async (req, res) => {
+  try {
+    const { nom, note, commentaire } = req.body;
+
+    // Validation
+    if (!nom || !note) {
+      return res.status(400).json({ 
+        error: 'Nom et note sont requis' 
+      });
+    }
+
+    if (note < 1 || note > 5) {
+      return res.status(400).json({ 
+        error: 'La note doit être entre 1 et 5' 
+      });
+    }
+
+    // Insertion dans Supabase
+    const { data, error } = await supabase
+      .from('avis')
+      .insert([
+        {
+          nom: nom.trim(),
+          note: parseInt(note),
+          commentaire: commentaire ? commentaire.trim() : null,
+          approuve: false, // Par défaut non approuvé
+          date_creation: new Date().toISOString()
+        }
+      ])
+      .select();
+
+    if (error) {
+      console.error('❌ Erreur Supabase:', error);
+      return res.status(500).json({ 
+        error: 'Erreur lors de l\'enregistrement de l\'avis' 
+      });
+    }
+
+    console.log('✅ Avis enregistré:', data[0]);
+    res.status(201).json({ 
+      success: true, 
+      message: 'Merci pour votre avis ! Il sera publié après modération.',
+      avis: data[0] 
+    });
+
+  } catch (error) {
+    console.error('❌ Erreur serveur:', error);
+    res.status(500).json({ 
+      error: 'Erreur serveur' 
+    });
+  }
+});
+
+// Route GET /api/avis - Récupérer les avis approuvés
+app.get('/api/avis', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('avis')
+      .select('*')
+      .eq('approuve', true)
+      .order('date_creation', { ascending: false });
+
+    if (error) {
+      console.error('❌ Erreur Supabase:', error);
+      return res.status(500).json({ 
+        error: 'Erreur lors de la récupération des avis' 
+      });
+    }
+
+    res.json({ avis: data });
+
+  } catch (error) {
+    console.error('❌ Erreur serveur:', error);
+    res.status(500).json({ 
+      error: 'Erreur serveur' 
+    });
+  }
+});
 app.listen(PORT, () => {
   console.log(`🚀 Serveur démarré sur le port ${PORT}`);
 });
