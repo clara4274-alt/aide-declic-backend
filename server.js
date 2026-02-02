@@ -71,16 +71,17 @@ app.post('/api/avis', async (req, res) => {
       });
     }
 
-    // Insertion dans Supabase
+    // Insertion dans Supabase avec les vrais noms de colonnes
     const { data, error } = await supabase
       .from('avis')
       .insert([
         {
-          nom: nom.trim(),
+          name: nom.trim(),
           note: parseInt(note),
           commentaire: commentaire ? commentaire.trim() : null,
-          approuve: false,
-          date_creation: new Date().toISOString()
+          autorisation_publication: false,
+          publie: false,
+          created_at: new Date().toISOString()
         }
       ])
       .select();
@@ -88,7 +89,8 @@ app.post('/api/avis', async (req, res) => {
     if (error) {
       console.error('❌ Erreur Supabase:', error);
       return res.status(500).json({ 
-        error: 'Erreur lors de l\'enregistrement de l\'avis' 
+        error: 'Erreur lors de l\'enregistrement de l\'avis',
+        details: error.message
       });
     }
 
@@ -102,7 +104,8 @@ app.post('/api/avis', async (req, res) => {
   } catch (error) {
     console.error('❌ Erreur serveur:', error);
     res.status(500).json({ 
-      error: 'Erreur serveur' 
+      error: 'Erreur serveur',
+      details: error.message
     });
   }
 });
@@ -113,13 +116,14 @@ app.get('/api/avis', async (req, res) => {
     const { data, error } = await supabase
       .from('avis')
       .select('*')
-      .eq('approuve', true)
-      .order('date_creation', { ascending: false });
+      .eq('publie', true)
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.error('❌ Erreur Supabase:', error);
       return res.status(500).json({ 
-        error: 'Erreur lors de la récupération des avis' 
+        error: 'Erreur lors de la récupération des avis',
+        details: error.message
       });
     }
 
@@ -128,7 +132,8 @@ app.get('/api/avis', async (req, res) => {
   } catch (error) {
     console.error('❌ Erreur serveur:', error);
     res.status(500).json({ 
-      error: 'Erreur serveur' 
+      error: 'Erreur serveur',
+      details: error.message
     });
   }
 });
